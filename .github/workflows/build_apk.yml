@@ -1,0 +1,36 @@
+name: Build Flutter APK
+
+# 触发条件：只要你在 main 分支上推送了代码，就会自动编译
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取你的代码
+      - uses: actions/checkout@v3
+      
+      # 2. 配置 Java 环境（安卓编译必备）
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+          
+      # 3. 配置 Flutter 环境
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'
+          
+      # 4. 下载项目依赖包
+      - run: flutter pub get
+      
+      # 5. 编译生成 APK 安装包
+      - run: flutter build apk --release
+      
+      # 6. 将生成的 APK 文件作为“工件”输出，供你下载
+      - uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
